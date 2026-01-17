@@ -1,6 +1,11 @@
 pipeline {
     agent any
 
+    tools {
+        jdk 'JDK17' // make sure this matches your Jenkins JDK installation name
+        maven 'Maven3' // make sure this matches your Jenkins Maven installation
+    }
+
     stages {
         stage('Checkout') {
             steps {
@@ -8,22 +13,30 @@ pipeline {
             }
         }
 
-        stage('Install') {
+        stage('Build') {
             steps {
-                sh 'npm install'
+                sh 'mvn clean package'
             }
         }
 
         stage('Test') {
             steps {
-                sh 'npm test'
+                sh 'mvn test'
             }
         }
 
-        stage('Build') {
+        stage('Package') {
             steps {
-                sh 'npm run build'
+                sh 'mvn install'
             }
         }
     }
+
+    post {
+        always {
+            archiveArtifacts artifacts: '**/target/*.jar', allowEmptyArchive: true
+            junit '**/target/surefire-reports/*.xml'
+        }
+    }
 }
+
