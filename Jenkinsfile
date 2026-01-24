@@ -2,41 +2,35 @@ pipeline {
     agent any
 
     tools {
-        jdk 'JDK17' // make sure this matches your Jenkins JDK installation name
-        maven 'Maven3' // make sure this matches your Jenkins Maven installation
+        jdk 'JDK17'
+        maven 'Maven3'
     }
 
     stages {
-        stage('Checkout') {
+        stage('GIT') {
             steps {
+                echo 'Getting project from github'
                 checkout scm
             }
         }
 
-        stage('Build') {
+        stage('CLEAN') {
             steps {
-                sh 'mvn clean package'
+                sh 'mvn clean'
             }
         }
 
-        stage('Test') {
+        stage('COMPILE') {
             steps {
-                sh 'mvn test'
+                sh 'mvn compile'
             }
         }
-
-        stage('Package') {
+        
+        stage('SONARQUBE') {
             steps {
-                sh 'mvn install'
+                sh 'mvn sonar:sonar'
             }
-        }
-    }
-
-    post {
-        always {
-            archiveArtifacts artifacts: '**/target/*.jar', allowEmptyArchive: true
-            junit '**/target/surefire-reports/*.xml'
-        }
+        }        
     }
 }
 
